@@ -1,10 +1,16 @@
 import amino
+import asyncio
 
-client = amino.Client()
-client.login(email='YOUR EMAIL', password='YOUR PASSWORD')
+async def main():
+    client = amino.Client()
+    await client.login(email="YOUR EMAIL", password="YOUR PASSWORD")
 
-# Follow
-client.follow('USER ID')
+    # Follow
+    await client.follow("USER ID")
 
-# Unfollow
-client.unfollow('USER ID')
+    # Unfollow
+    await client.unfollow("USER ID")
+
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(main())

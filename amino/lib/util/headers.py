@@ -11,7 +11,7 @@ class Headers:
 
         headers = {
             "NDCDEVICEID": dev.device_id,
-            "NDC-MSG-SIG": dev.device_id_sig,
+            "NDC-MSG-SIG": "Aa0ZDPOEgjt1EhyVYyZ5FgSZSqJt",
             "Accept-Language": "en-US",
             "Content-Type": "application/json; charset=utf-8",
             "User-Agent": dev.user_agent,

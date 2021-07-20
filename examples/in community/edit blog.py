@@ -1,7 +1,13 @@
 import amino
+import asyncio
 
-client = amino.Client()
-client.login(email='YOUR EMAIL', password='YOUR PASSWORD')
-subclient = amino.SubClient(comId='COMMUNITY ID', profile=client.profile)
+async def main():
+    client = amino.Client()
+    await client.login(email="YOUR EMAIL", password="YOUR PASSWORD")
+    subclient = await amino.SubClient(aminoId="AMINO ID", profile=client.profile)
 
-subclient.edit_blog('BLOG ID', 'TITLE', 'CONTENT')
+    await subclient.edit_blog(blogId="BLOG ID", title="TITLE", content="CONTENT")
+
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(main())

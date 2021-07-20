@@ -1,12 +1,18 @@
 import amino
+import asyncio
 
-client = amino.Client()
-client.login(email='YOUR EMAIL', password='YOUR PASSWORD')
+async def main():
+    client = amino.Client()
+    await client.login(email="YOUR EMAIL", password="YOUR PASSWORD")
 
-# Send Images
-with open('file.png', 'rb') as file:
-    client.send_message(message='MESSAGE', chatId='CHAT ID', file=file)
+    # Send Images
+    with open("file.png", "rb") as file:
+        await client.send_message(chatId="CHAT ID", file=file)
 
-# Send Audios
-with open('file.mp3', 'rb') as file:
-    client.send_message(message='MESSAGE', chatId='CHAT ID', file=file, fileType="audio")
+    # Send Audios
+    with open("file.mp3", "rb") as file:
+        await client.send_message(chatId="CHAT ID", file=file, fileType="audio")
+
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(main())

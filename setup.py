@@ -5,7 +5,7 @@ with open("README.md", "r") as stream:
 
 setup(
     name = 'Amino.py',
-    version = '1.2.17',
+    version = '2.0.0',
     url = 'https://github.com/Slimakoi/Amino.py',
     download_url = 'https://github.com/Slimakoi/Amino.py/tarball/master',
     license = 'MIT',
@@ -31,8 +31,10 @@ setup(
         'setuptools',
         'requests',
         'six',
-        'websocket-client==0.57.0',
-        'json_minify'
+        'json_minify',
+        'websockets',
+        'websocket-client==0.57.0'
+        'aiohttp'
     ],
     setup_requires = [
         'wheel'

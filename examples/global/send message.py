@@ -1,6 +1,12 @@
 import amino
+import asyncio
 
-client = amino.Client()
-client.login(email='YOUR EMAIL', password='YOUR PASSWORD')
+async def main():
+    client = amino.Client()
+    await client.login(email="YOUR EMAIL", password="YOUR PASSWORD")
 
-client.send_message(message='MESSAGE', chatId='CHAT ID')
+    await client.send_message(chatId="CHAT ID", message="MESSAGE")
+
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(main())

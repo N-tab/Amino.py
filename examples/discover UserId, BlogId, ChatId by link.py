@@ -1,10 +1,12 @@
 import amino
+import asyncio
 
-client = amino.Client()
-client.login(email='YOUR EMAIL', password='YOUR PASSWORD')
+async def main():
+    client = amino.Client()
+    await client.login(email="YOUR EMAIL", password="YOUR PASSWORD")
 
-# Url Example
-# https://aminoapps.com/p/EXAMPLE
+    objectId = (await client.get_from_code("https://aminoapps.com/p/EXAMPLE")).objectId
+    print(objectId)
 
-objectId = client.get_from_code("EXAMPLE").objectId
-print(objectId)
+loop = asyncio.get_event_loop()
+loop.run_until_complete(main())

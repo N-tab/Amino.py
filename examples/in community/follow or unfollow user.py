@@ -1,11 +1,17 @@
 import amino
+import asyncio
 
-client = amino.Client()
-client.login(email='YOUR EMAIL', password='YOUR PASSWORD')
-subclient = amino.SubClient(comId='COMMUNITY ID', profile=client.profile)
+async def main():
+    client = amino.Client()
+    await client.login(email="YOUR EMAIL", password="YOUR PASSWORD")
+    subclient = await amino.SubClient(aminoId="AMINO ID", profile=client.profile)
 
-# Follow
-subclient.follow('USER ID')
+    # Follow
+    await subclient.follow("USER ID")
 
-# Unfollow
-subclient.unfollow('USER ID')
+    # Unfollow
+    await subclient.unfollow("USER ID")
+
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(main())

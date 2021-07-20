@@ -13,8 +13,6 @@ class DeviceGenerator:
                 else:
                     self.device_id = data["device_id"]
 
-                self.device_id_sig = data["device_id_sig"]
-
         except (FileNotFoundError, json.decoder.JSONDecodeError):
             device = generate_device_info()
             with open("device.json", "w") as stream:
@@ -28,5 +26,3 @@ class DeviceGenerator:
                     self.device_id = deviceId
                 else:
                     self.device_id = data["device_id"]
-
-                self.device_id_sig = data["device_id_sig"]
