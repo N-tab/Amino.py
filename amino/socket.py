@@ -20,14 +20,11 @@ class SocketHandler:
     async def handle_message(self, data):
         if self.debug is True:
             print(f"[socket][handle_message] Got Data : {data}")
-
         await self.client.handle_socket_message(data)
-        return
 
     async def send(self, data):
         if self.debug is True:
             print(f"[socket][send] Sending Data : {data}")
-
         await self.socket.send(data)
 
     async def run_amino_socket(self):
@@ -50,21 +47,17 @@ class SocketHandler:
         if self.debug is True:
             print(f"[socket][startup] Starting Socket")
 
-        #threading.Thread(await self.run_amino_socket()).start()
-        asyncio.gather(self.run_amino_socket())
+        threading.Thread(target = asyncio.run, args = (self.run_amino_socket(), )).start()
 
     def close(self):
         if self.debug is True:
             print(f"[socket][close] Closing Socket")
-
         self.active = False
         try:
             self.socket.close()
         except Exception as closeError:
             if self.debug is True:
                 print(f"[socket][close] Error while closing Socket : {closeError}")
-
-        return
 
 class Callbacks:
     def __init__(self, client):
@@ -136,21 +129,21 @@ class Callbacks:
             "Typing": self.on_user_typing_end,
         }
 
-    def _resolve_chat_message(self, data):
+    async def _resolve_chat_message(self, data):
         key = f"{data['o']['chatMessage']['type']}:{data['o']['chatMessage'].get('mediaType', 0)}"
-        return self.chat_methods.get(key, self.default)(data)
+        return await self.chat_methods.get(key, self.default)(data)
 
-    def _resolve_chat_action_start(self, data):
+    async def _resolve_chat_action_start(self, data):
         key = data['o'].get('actions', 0)
-        return self.chat_actions_start.get(key, self.default)(data)
+        return await self.chat_actions_start.get(key, self.default)(data)
 
-    def _resolve_chat_action_end(self, data):
+    async def _resolve_chat_action_end(self, data):
         key = data['o'].get('actions', 0)
-        return self.chat_actions_end.get(key, self.default)(data)
+        return await self.chat_actions_end.get(key, self.default)(data)
 
     def resolve(self, data):
         data = json.loads(data)
-        return self.methods.get(data["t"], self.default)(data)
+        return asyncio.create_task(self.methods.get(data["t"], self.default)(data))
 
     async def call(self, type, data):
         if type in self.handlers:
@@ -158,14 +151,13 @@ class Callbacks:
                 await handler(data)
 
     def event(self, type):
-        def registerHandler(handler):
+        def register_handler(handler):
             if type in self.handlers:
                 self.handlers[type].append(handler)
             else:
                 self.handlers[type] = [handler]
             return handler
-
-        return registerHandler
+        return register_handler
 
     async def on_text_message(self, data): await self.call(getframe(0).f_code.co_name, objects.Event(data["o"]).Event)
     async def on_image_message(self, data): await self.call(getframe(0).f_code.co_name, objects.Event(data["o"]).Event)
@@ -215,8 +207,6 @@ class Callbacks:
     async def on_timestamp_message(self, data): await self.call(getframe(0).f_code.co_name, objects.Event(data["o"]).Event)
     async def on_welcome_message(self, data): await self.call(getframe(0).f_code.co_name, objects.Event(data["o"]).Event)
     async def on_invite_message(self, data): await self.call(getframe(0).f_code.co_name, objects.Event(data["o"]).Event)
-
     async def on_user_typing_start(self, data): await self.call(getframe(0).f_code.co_name, objects.Event(data["o"]).Event)
     async def on_user_typing_end(self, data): await self.call(getframe(0).f_code.co_name, objects.Event(data["o"]).Event)
-
     async def default(self, data): await self.call(getframe(0).f_code.co_name, data)

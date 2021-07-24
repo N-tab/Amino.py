@@ -6,9 +6,6 @@ from typing import BinaryIO
 from . import client
 from .lib.util import exceptions, headers, device, objects
 
-#device = device.DeviceGenerator()
-headers.sid = client.Client().sid
-
 class ACM(client.Client):
     def __init__(self, profile: objects.UserProfile, comId: str = None):
         client.Client.__init__(self)

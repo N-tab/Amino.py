@@ -5,9 +5,10 @@ client = amino.Client()
 
 async def main():
     await client.login(email="YOUR EMAIL", password="YOUR PASSWORD")
+    await client.session.close()
 
 @client.event("on_text_message")
-def on_text_message(data):
+async def on_text_message(data):
     print(f"{data.message.author.nickname}: {data.message.content}")
 
 

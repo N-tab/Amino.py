@@ -15,7 +15,6 @@ from . import client
 from .lib.util import exceptions, headers, device, objects
 
 device = device.DeviceGenerator()
-headers.sid = client.Client().sid
 
 class VCHeaders:
     def __init__(self, data = None):
