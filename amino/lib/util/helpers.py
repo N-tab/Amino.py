@@ -1,13 +1,12 @@
 import json
 
-from hashlib import sha1
 from functools import reduce
-from base64 import b85decode, b64decode
+from base64 import b64decode
 
 
 def generate_device_info():
     return {
-        "device_id": "18FDA5A11DA6EB0A29583AF1EBD020837437833DD6819B953949749CE2D8085FAE4BDAED592633A4F0",
+        "device_id": "2243B1AAEACF15EBD317545B28C8CB2D63488120D0D4B65E1F7189242D8AB71F3556AE2761FCB7BEE8",
         "user_agent": "Dalvik/2.1.0 (Linux; U; Android 5.1.1; SM-G973N Build/beyond1qlteue-user 5; com.narvii.amino.master/3.4.33562)"
     }
 

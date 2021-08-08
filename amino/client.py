@@ -1,11 +1,10 @@
 import json
 import base64
 import aiohttp
+import asyncio
 import threading
 
-from uuid import UUID
-from os import urandom
-from binascii import hexlify
+from uuid import uuid4
 from time import timezone, sleep
 from typing import BinaryIO, Union
 from time import time as timestamp
@@ -22,7 +21,6 @@ class Client(Callbacks, SocketHandler):
         self.authenticated = False
         self.configured = False
         self.user_agent = device.user_agent
-
         if deviceId is not None: self.device_id = deviceId
         else: self.device_id = device.device_id
 
@@ -34,8 +32,18 @@ class Client(Callbacks, SocketHandler):
         self.userId = None
         self.account: objects.UserProfile = objects.UserProfile(None)
         self.profile: objects.UserProfile = objects.UserProfile(None)
-
         self.session = aiohttp.ClientSession()
+    
+    def __del__(self):
+        try:
+            loop = asyncio.get_event_loop()
+            loop.create_task(self._close_session())
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            loop.run_until_complete(self._close_session())
+
+    async def _close_session(self):
+        if not self.session.closed: await self.session.close()
 
     def parse_headers(self, data = None):
         if not data:
@@ -306,7 +314,7 @@ class Client(Callbacks, SocketHandler):
                 self.account: None
                 self.profile: None
                 headers.sid = None
-                self.close()
+                await self.close()
                 await self.session.close()
                 return response.status
 
@@ -1277,7 +1285,7 @@ class Client(Callbacks, SocketHandler):
 
     async def send_coins(self, coins: int, blogId: str = None, chatId: str = None, objectId: str = None, transactionId: str = None):
         url = None
-        if transactionId is None: transactionId = str(UUID(hexlify(urandom(16)).decode('ascii')))
+        if transactionId is None: transactionId = str(uuid4())
 
         data = {
             "coins": coins,
@@ -2102,3 +2110,31 @@ class Client(Callbacks, SocketHandler):
         async with self.session.get(f"{self.api}/g/s/avatar-frame?start={start}&size={size}", headers=self.parse_headers()) as response:
             if response.status != 200: return exceptions.CheckException(json.loads(await response.text()))
             else: return objects.AvatarFrameList(json.loads(await response.text())["avatarFrameList"]).AvatarFrameList
+    
+    async def subscribe_amino_plus(self, transactionId="", sku="d940cf4a-6cf2-4737-9f3d-655234a92ea5"):
+        """
+        Subscibes to amino+
+
+        **Parameters**
+            - **transactionId** - The transaction Id as a uuid4
+
+        **Returns**
+            - **Success** : 200 (int)
+
+            - **Fail** : :meth:`Exceptions <amino.lib.util.exceptions>`
+        """
+        data = json.dumps({
+            {
+                "sku": sku,
+                "packageName": "com.narvii.amino.master",
+                "paymentType": 1,
+                "paymentContext": {
+                    "transactionId": (transactionId or str(uuid4())),
+                    "isAutoRenew": True
+                },
+                "timestamp": timestamp()
+            }
+        })
+        async with self.session.post(f"{self.api}/g/s/membership/product/subscribe", headers=self.parse_headers(), data=data) as response:
+            if response.status != 200: return exceptions.CheckException(json.loads(await response.text()))
+            else: return response.status

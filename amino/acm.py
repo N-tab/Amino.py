@@ -1,5 +1,6 @@
-import requests
 import json
+import asyncio
+
 from time import time as timestamp
 from typing import BinaryIO
 
@@ -9,9 +10,19 @@ from .lib.util import exceptions, headers, device, objects
 class ACM(client.Client):
     def __init__(self, profile: objects.UserProfile, comId: str = None):
         client.Client.__init__(self)
-
         self.profile = profile
         self.comId = comId
+
+    def __del__(self):
+        try:
+            loop = asyncio.get_event_loop()
+            loop.create_task(self._close_session())
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            loop.run_until_complete(self._close_session())
+
+    async def _close_session(self):
+        if not self.session.closed: await self.session.close()
 
     def parse_headers(self, data = None):
         if not data:

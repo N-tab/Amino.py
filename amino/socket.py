@@ -27,7 +27,7 @@ class SocketHandler:
             print(f"[socket][send] Sending Data : {data}")
         await self.socket.send(data)
 
-    async def run_amino_socket(self):
+    async def run(self):
         self.headers = {
             "NDCDEVICEID": self.client.device_id,
             "NDCAUTH": f"sid={self.client.sid}"
@@ -40,8 +40,23 @@ class SocketHandler:
             if self.debug is True:
                 print(f"[socket][start] Socket Started")
 
-            while True:
-                await self.handle_message(await websocket.recv())
+            while self.active:
+                try: msg = await websocket.recv()
+                except websockets.exceptions.ConnectionClosedOK: continue
+                await self.handle_message(msg)
+    
+    async def run_amino_socket(self):
+        # uwu hi okok here, this is a stupid way to do this,
+        # but i can't think of another one lmao this is a
+        # workaround for amino sockets dying after a few
+        # minutes.
+        # Feel free to modify, if you can ;)
+        asyncio.create_task(self.run())
+        while True:
+            await asyncio.sleep(360)
+            if self.socket.closed: return
+            await self.close()
+            asyncio.create_task(self.run())
 
     async def startup(self):
         if self.debug is True:
@@ -49,12 +64,12 @@ class SocketHandler:
 
         threading.Thread(target = asyncio.run, args = (self.run_amino_socket(), )).start()
 
-    def close(self):
+    async def close(self):
         if self.debug is True:
             print(f"[socket][close] Closing Socket")
         self.active = False
         try:
-            self.socket.close()
+            await self.socket.close()
         except Exception as closeError:
             if self.debug is True:
                 print(f"[socket][close] Error while closing Socket : {closeError}")

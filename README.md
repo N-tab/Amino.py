@@ -35,7 +35,7 @@ To install Amino.py, run `python3 -m pip install amino.py`.
 [Read the Docs Link](https://aminopy.readthedocs.io/en/latest/)
 
 #### Alternative Installation (Not recommended)
-0. Make sure pip is installed see: [How to setup pip](https://nitratine.net/blog/post/how-to-setup-pythons-pip/)
+0. Make sure pip is installed and added to PATH, see: [How to setup pip](https://nitratine.net/blog/post/how-to-setup-pythons-pip/)
 1. Alternatively download the API from GitHub [here](https://github.com/Slimakoi/Amino.py/archive/refs/heads/master.zip)
 2. Extract the .zip file either with [WinRAR](https://www.win-rar.com/download.html?&L=0) or [7-Zip](https://www.7-zip.org/download.html)
 3. Open the extracted folder in an IDE of your choice, and navigate to the folder named `Amino.py-master`

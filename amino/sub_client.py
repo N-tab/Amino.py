@@ -1,15 +1,13 @@
-import hmac
 import json
 import base64
+import asyncio
 
 from uuid import UUID
 from os import urandom
-from hashlib import sha1
 from time import timezone
 from binascii import hexlify
 from typing import BinaryIO, Union
 from time import time as timestamp
-from json_minify import json_minify
 
 from . import client
 from .lib.util import exceptions, headers, device, objects
@@ -47,18 +45,25 @@ class SubClient(client.Client):
     async def _init(self):
         if self.comId is not None:
             self.community: objects.Community = await self.get_community_info(self.comId)
-
         if self.aminoId is not None:
             self.comId = (await client.Client().search_community(self.aminoId)).comId[0]
             self.community: objects.Community = await client.Client().get_community_info(self.comId)
-
         if self.comId is None and self.aminoId is None: raise exceptions.NoCommunity()
-
         try: self.profile: objects.UserProfile = await self.get_user_info(userId=self.profile.userId)
         except AttributeError: raise exceptions.FailedLogin()
         except exceptions.UserUnavailable(): pass
-
         return self
+
+    def __del__(self):
+        try:
+            loop = asyncio.get_event_loop()
+            loop.create_task(self._close_session())
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            loop.run_until_complete(self._close_session())
+
+    async def _close_session(self):
+        if not self.session.closed: await self.session.close()
 
     def parse_headers(self, data = None):
         if data is not None:
@@ -450,28 +455,6 @@ class SubClient(client.Client):
         })
 
         async with self.session.post(f"{self.api}/x{self.comId}/s/user-profile/{userId}/comment", headers=self.parse_headers(data=data), data=data) as response:
-            if response.status != 200: return exceptions.CheckException(json.loads(await response.text()))
-            else: return response.status
-
-    async def send_active_obj(self, startTime: int = None, endTime: int = None, optInAdsFlags: int = 2147483647, tz: int = -timezone // 1000, timers: list = None, timestamp: int = int(timestamp() * 1000)):
-        data = {
-            "userActiveTimeChunkList": [{
-                "start": startTime,
-                "end": endTime
-            }],
-            "timestamp": timestamp,
-            "optInAdsFlags": optInAdsFlags,
-            "timezone": tz
-        }
-
-        if timers:
-            data["userActiveTimeChunkList"] = timers
-
-        data = json_minify(json.dumps(data))
-        mac = hmac.new(bytes.fromhex("715ffccf8c0536f186bf127a16c14682827fc581"), data.encode("utf-8"), sha1)
-        signature = base64.b64encode(bytes.fromhex("01") + mac.digest()).decode("utf-8")
-
-        async with self.session.post(f"{self.api}/x{self.comId}/s/community/stats/user-active-time", headers=headers.Headers(data=data, sig=signature, deviceId=self.device_id).headers, data=data) as response:
             if response.status != 200: return exceptions.CheckException(json.loads(await response.text()))
             else: return response.status
 
