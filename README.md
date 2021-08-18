@@ -18,6 +18,11 @@
 </p>
 
 
+## Depreciation
+Amino.py is formally loosing support as of today, we're sorry about the sudden announcement.
+Recently TA pushed updates relating to security, both Aza and Slimakoi (the lead contributors) are not looking to develop Amino.py any longer.
+The project is licensed under MIT and we are welcoming anybody to fork it.
+
 
 
 #### What is this?
