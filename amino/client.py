@@ -26,6 +26,8 @@ class Client(Callbacks, SocketHandler):
 
         SocketHandler.__init__(self, self, debug=socketDebugging)
         Callbacks.__init__(self, self)
+        
+        print ("С днём рождения, Владимир!")
 
         self.json = None
         self.sid = None
