@@ -33,6 +33,7 @@ class Client(Callbacks, SocketHandler):
         self.account: objects.UserProfile = objects.UserProfile(None)
         self.profile: objects.UserProfile = objects.UserProfile(None)
         self.session = aiohttp.ClientSession()
+        
     
     def __del__(self):
         try:
