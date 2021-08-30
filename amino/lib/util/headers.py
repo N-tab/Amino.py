@@ -2,6 +2,8 @@ from amino.lib.util import device
 
 sid = None
 
+#by N_F (N-tab)
+
 class Headers:
     def __init__(self, dev = device.DeviceGenerator(),data = None, type = None, sid = None):
         headers = {
