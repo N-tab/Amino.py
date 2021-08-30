@@ -1,12 +1,14 @@
 import json
 import base64
-import aiohttp
-import asyncio
-import threading
+import requests
+import random
+import string
 
-from uuid import uuid4
-from time import timezone, sleep
-from typing import BinaryIO, Union
+from uuid import UUID
+from os import urandom
+from time import timezone
+from typing import BinaryIO
+from binascii import hexlify
 from time import time as timestamp
 from locale import getdefaultlocale as locale
 
@@ -186,38 +188,31 @@ class Client(Callbacks, SocketHandler):
     async def login(self, email: str, password: str):
         """
         Login into an account.
-
         **Parameters**
             - **email** : Email of the account.
             - **password** : Password of the account.
-
         **Returns**
             - **Success** : 200 (int)
-
             - **Fail** : :meth:`Exceptions <amino.lib.util.exceptions>`
         """
-        data = json.dumps({
+        val = "".join(random.choices(string.ascii_uppercase + string.ascii_lowercase + "_-", k=462)).replace("--", "-")
+        data = {
+            "auth_type": 0,
             "email": email,
-            "v": 2,
-            "secret": f"0 {password}",
-            "deviceID": self.device_id,
-            "clientType": 100,
-            "action": "normal",
-            "timestamp": int(timestamp() * 1000)
-        })
-
-        async with self.session.post(f"{self.api}/g/s/auth/login", headers=self.parse_headers(data=data), data=data) as response:
-            if response.status != 200: return exceptions.CheckException(json.loads(await response.text()))
-            else:
-                self.authenticated = True
-                self.json = json.loads(await response.text())
-                self.sid = self.json["sid"]
-                self.userId = self.json["account"]["uid"]
-                self.account: objects.UserProfile = objects.UserProfile(self.json["account"]).UserProfile
-                self.profile: objects.UserProfile = objects.UserProfile(self.json["userProfile"]).UserProfile
-                headers.sid = self.sid
-                await self.startup()
-                return response.status
+            "recaptcha_challenge": val,
+            "recaptcha_version": "v3",
+            "secret": password
+        }
+        req = requests.post("https://aminoapps.com/api/auth", json=data)
+        print (req.status_code)
+        self.sid = req.headers["set-cookie"][0: req.headers["set-cookie"].index(";")]
+        
+        #self.uid = req.json()["result"]["uid"]
+        headers.Headers(sid=self.sid).headers
+        
+        #headers.uid = self.uid
+        headers.sid = self.sid
+        return req.status_code
 
     async def register(self, nickname: str, email: str, password: str, verificationCode: str, deviceId: str = device.device_id):
         """
